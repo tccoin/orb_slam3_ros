@@ -64,6 +64,8 @@ int main(int argc, char **argv)
 
     ros::spin();
 
+    pSLAM->SaveTrajectoryTUM("traj.tum");
+
     // Stop all threads
     pSLAM->Shutdown();
     ros::shutdown();

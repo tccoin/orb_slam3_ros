@@ -76,22 +76,25 @@ void setup_publishers(ros::NodeHandle &node_handler, image_transport::ImageTrans
 
     kf_markers_pub = node_handler.advertise<visualization_msgs::Marker>(node_name + "/kf_markers", 1000);
 
-    if (sensor_type == ORB_SLAM3::System::IMU_MONOCULAR || sensor_type == ORB_SLAM3::System::IMU_STEREO || sensor_type == ORB_SLAM3::System::IMU_RGBD)
-    {
-        odom_pub = node_handler.advertise<nav_msgs::Odometry>(node_name + "/body_odom", 1);
-    }
+    // if (sensor_type == ORB_SLAM3::System::IMU_MONOCULAR || sensor_type == ORB_SLAM3::System::IMU_STEREO || sensor_type == ORB_SLAM3::System::IMU_RGBD)
+    // {
+    //     odom_pub = node_handler.advertise<nav_msgs::Odometry>(node_name + "/body_odom", 1);
+    // }
+    odom_pub = node_handler.advertise<nav_msgs::Odometry>(node_name + "/body_odom", 1);
 }
 
 void publish_topics(ros::Time msg_time, Eigen::Vector3f Wbb)
 {
     Sophus::SE3f Twc = pSLAM->GetCamTwc();
+    Sophus::SE3f Tcw = Twc.inverse();
 
     if (Twc.translation().array().isNaN()[0] || Twc.rotationMatrix().array().isNaN()(0,0)) // avoid publishing NaN
         return;
     
     // Common topics
     publish_camera_pose(Twc, msg_time);
-    publish_tf_transform(Twc, world_frame_id, cam_frame_id, msg_time);
+    publish_tf_transform(Tcw, world_frame_id, cam_frame_id, msg_time);
+    // cout << "Publishing the tf" << endl;
 
     publish_tracking_img(pSLAM->GetCurrentFrame(), msg_time);
 
